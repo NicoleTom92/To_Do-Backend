@@ -23,7 +23,7 @@ functions:
           cors: true
       - http:
           method: delete
-          path: todo
+          path: todo/{id}
           cors: true
       - http:
           method: post

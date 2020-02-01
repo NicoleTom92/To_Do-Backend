@@ -8,7 +8,7 @@ const connection = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: "todo"
+  database: 'TODOS'
 })
 
 const app = express();
@@ -28,10 +28,15 @@ app.get("/todo", function (request, response) {
 
 //POST//
 app.post("/todo", function (request, response) {
-  const text = request.body;
-  const date = request.body;
-  response.status(200).json({
-    message: `Received a request to add task ${text} with date ${date}`
+  const task = request.body; 
+  task.completed = false;
+  connection.query(task, function (err, data) {
+    if (err) {
+      response.status(500).json({error: err});
+    } else {
+      task.id = data.insertid;
+      response.status(201).json(task);
+    }
   });
 });
 
@@ -56,9 +61,15 @@ app.put("/todo/:id", function (request, response) {
 //DELETE//
 app.delete("/todo/:id", function (request, response) {
   const id = request.params.id;
-  response.status(200).json({
-    message: `Successfully deleted the task with ID ${id}.`
-  })
+  connection.query("DELETE FROM Task WHERE is=?", [id], function (err, data) {
+    if (err) {
+      response.status(500).json({
+        error: err
+      });
+    } else {
+      response.sendStatus(200);
+    }
+  });
 });
 
 module.exports.todo = serverlessHttp(this.todo);
