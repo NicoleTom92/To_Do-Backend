@@ -6,23 +6,27 @@ provider:
   runtime: nodejs12.x
 
 functions:
-  todo:
-    handler: handler.app
-    events:   
-      - http: 
-          method: get 
+  todo: 
+    handler: handler.todo
+    environment:
+      DB_HOST: ${opt:DB_HOST}
+      DB_USER: ${opt:DB_USER}
+      DB_PASSWORD: ${opt:DB_PASSWORD}
+    events:
+      - http:
+          method: get
           path: todo
           cors: true
-      - http: 
+      - http:
           method: put
-          path: todo
+          path: todo/{id}
           cors: true
       - http:
           method: delete
           path: todo
           cors: true
       - http:
-          method: post 
+          method: post
           path: todo
           cors: true
       

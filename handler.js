@@ -2,48 +2,64 @@ const express = require("express");
 const cors = require("cors");
 const serverlessHttp = require("serverless-http");
 const bodyParser = require("body-parser");
+const mysql = require("mysql");
+
+const connection = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: "todo"
+})
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-app.get("/todo", function(_request, response) {
-
-  response.status(200).json({
-    todo: [
-      {
-        name: "Task 1",
-        completed: false,
-        available: true,
-        dateCompleted: "2020-01-09",
-        id: 1
-      },
-      {
-        name: "Task 2",
-        completed: false,
-        available: true,
-        dateCompleted: "2020-02-01",
-        id: 2
-      },
-      {
-        name: "Task 3",
-        completed: false,
-        available: false,
-        dateCompleted: "2020-02-17",
-        id: 3
-      },
-    ]
+//GET//
+app.get("/todo", function (request, response) {
+  connection.query("SELECT * FROM Task", function (err, data) {
+    if (err) {
+      response.status(500).json({ error: err });
+    } else {
+      response.status(200).json(data)
+    }
   });
 });
 
-app.put("/todo/:id", function(request, response) {
- 
+//POST//
+app.post("/todo", function (request, response) {
+  const text = request.body;
+  const date = request.body;
+  response.status(200).json({
+    message: `Received a request to add task ${text} with date ${date}`
+  });
+});
+
+//PUT//
+app.put("/todo/:id", function (request, response) {
   const updatedtodo = request.body;
   const id = request.params.id;
 
-  response.status(200).json({
-    message: `Successfully updated Task ID ${id} with name: ${updatedtodo.name}, completed: ${updatedtodo.completed}, available: ${updatedtodo.available}`
-  });
+  connection.query(
+    [updatedtodo, id],
+    function (err) {
+      if (err) {
+        response.status(500).json({ error: err });
+      } else {
+        response.sendStatus(200);
+      }
+    }
+  );
 });
 
-module.exports.app = serverlessHttp(app);
+
+//DELETE//
+app.delete("/todo/:id", function (request, response) {
+  const id = request.params.id;
+  response.status(200).json({
+    message: `Successfully deleted the task with ID ${id}.`
+  })
+});
+
+module.exports.todo = serverlessHttp(this.todo);
+
