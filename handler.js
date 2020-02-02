@@ -1,67 +1,67 @@
 const express = require("express");
-const cors = require("cors");
 const serverlessHttp = require("serverless-http");
+const cors = require("cors");
 const bodyParser = require("body-parser");
 const mysql = require("mysql");
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
 
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: 'TODOS'
-})
+});
 
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
-
-//GET//
-app.get("/todo", function (request, response) {
-  connection.query("SELECT * FROM Task", function (err, data) {
+//GET//tasks
+app.get("/tasks", function (request, response) {
+  connection.query("SELECT * FROM tasks", function (err, data) {
     if (err) {
-      response.status(500).json({ error: err });
+      response.status(500).json({
+        error: err
+      });
     } else {
-      response.status(200).json(data)
+      response.status(200).json({
+        tasks: data
+      });
     }
   });
 });
 
-//POST//
-app.post("/todo", function (request, response) {
-  const task = request.body; 
-  task.completed = false;
-  connection.query(task, function (err, data) {
+//POST//tasks
+app.post("/tasks", function (request, response) {
+  const newTasks = request.body;
+  connection.query("INSERT INTO tasks SET ?", [newTasks], function (err, data) {
     if (err) {
       response.status(500).json({error: err});
     } else {
-      task.id = data.insertid;
-      response.status(201).json(task);
+      newTasks.id = data.insertId;
+      response.status(201).json(newTasks);
     }
   });
 });
 
-//PUT//
-app.put("/todo/:id", function (request, response) {
-  const updatedtodo = request.body;
+//PUT//tasks
+app.put("/tasks/:id", function (request, response) {
+  const updatedTasks = request.body;
   const id = request.params.id;
-
-  connection.query(
-    [updatedtodo, id],
+  connection.query('UPDATE Tasks SET ? WHERE id= ?' , [updatedTasks, id],
     function (err) {
       if (err) {
         response.status(500).json({ error: err });
       } else {
         response.sendStatus(200);
       }
-    }
-  );
+    });
 });
 
 
 //DELETE//
-app.delete("/todo/:id", function (request, response) {
-  const id = request.params.id;
-  connection.query("DELETE FROM Task WHERE is=?", [id], function (err, data) {
+app.delete("/tasks/:id", function (request, response) {
+  const id2 = request.params.id;
+  connection.query("DELETE FROM Task WHERE id=?", [id2], function (err) {
     if (err) {
       response.status(500).json({
         error: err
@@ -72,5 +72,5 @@ app.delete("/todo/:id", function (request, response) {
   });
 });
 
-module.exports.todo = serverlessHttp(this.todo);
+module.exports.todo = serverlessHttp(this.app);
 
