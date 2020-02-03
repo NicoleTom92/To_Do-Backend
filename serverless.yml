@@ -5,7 +5,7 @@ provider:
   runtime: nodejs12.x
 functions:
   tasks:
-    handler: handler.app
+    handler: handler.todo
     environment:
       DB_HOST: ${opt:DB_HOST}
       DB_USER: ${opt:DB_USER}
@@ -27,4 +27,3 @@ functions:
           method: post
           path: tasks
           cors: true
-      
