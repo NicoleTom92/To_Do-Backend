@@ -77,5 +77,5 @@ app.delete("/tasks/:id", function (request, response) {
   });
 });
 
-module.exports.todo = serverlessHttp(this.app);
+module.exports.todo = serverlessHttp(app);
 
